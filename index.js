@@ -1,51 +1,98 @@
-// //map 구조
-const graph = {
-  A: ['B', 'C'],
-  B: ['A', 'D'],
-  C: ['A', 'G', 'H', 'I'],
-  D: ['B', 'E', 'F'],
-  E: ['D'],
-  F: ['D'],
-  G: ['C'],
-  H: ['C'],
-  I: ['C', 'J'],
-  J: ['I']
-};
+const problem = `9
+0
+12345678
+1
+2
+0
+0
+0
+0
+32`
 
-// 깊이 우선 탐색 - DFS
-const dfs = (graph, startNode) => {
-  const visited = []; //탐색한 노드들
-  let needVisit = []; //탐색해야할 노드들
 
-  needVisit.push(startNode);
-  while(needVisit.length){
-    const node = needVisit.shift(); //queue 구조
-    if(!visited.includes(node)){
-      visited.push(node);
-      needVisit = [...graph[node], ...needVisit];
+class MinHeap {
+  constructor() {
+    this.heap = [];
+  }
+
+  swap(indexA, indexB) {
+    [this.heap[indexA], this.heap[indexB]] = [this.heap[indexB], this.heap[indexA]];
+  }
+
+  size() {
+    return this.heap.length;
+  }
+
+  push(value) {
+    this.heap.push(value);
+    this.upHeap();
+    return this.heap.length;
+  }
+
+  pop() {
+    if (this.heap.length === 0) {
+      return undefined;
+    }
+    this.swap(0, this.heap.length - 1);
+    const value = this.heap.pop();
+    this.downHeap(0);
+    return value;
+  }
+
+  upHeap() {
+    let current = this.heap.length - 1;
+
+    while (0 < current) {
+      const parent = Math.floor((current - 1) / 2);
+      if (this.heap[parent] <= this.heap[current]) {
+        return;
+      }
+      this.swap(parent, current);
+      current = parent;
     }
   }
 
-  return visited;
-}
+  downHeap(idx) {
+    let current = idx;
 
-console.log("dfs : ", dfs(graph, 'A'))
+    while (current < this.heap.length) {
+      // CBT 구조 특징 : 특정 idx의 자식 노드 -> idx*2+1, idx*2+2
+      let leftChild = current * 2 + 1;
+      let rightChild = current * 2 + 2;
 
-//넓이 우선 탐색 - BFS
-const bfs = (graph, startNode) => {
-  let visited = [];
-  let needVisit = [];
-
-  needVisit.push(startNode);
-  while(needVisit.length){
-    const node = needVisit.shift()
-    if(!visited.includes(node)){
-      visited.push(node);
-      needVisit = [...needVisit, ...graph[node]];
+      if (this.heap[leftChild] === undefined) {
+        break;
+      }
+      if (this.heap[rightChild] === undefined) {
+        if (this.heap[current] <= this.heap[leftChild]) {
+          break;
+        }
+        this.swap(current, leftChild);
+        current = leftChild;
+        continue;
+      }
+      const nextChild = this.heap[leftChild] <= this.heap[rightChild] ? leftChild : rightChild;
+      if (this.heap[current] <= this.heap[nextChild]) {
+        break;
+      }
+      this.swap(current, nextChild);
+      current = nextChild;
     }
   }
-
-  return visited;
 }
 
-console.log("bfs : ", bfs(graph, 'A'))
+// const [N, ...arr] = require("fs").readFileSync("/dev/stdin").toString().trim().split("\n").map(Number);
+const [N, ...arr] = problem.toString().trim().split('\n').map(Number)
+const pq = new MinHeap();
+console.log(
+  arr
+    .reduce((acc, cur) => {
+      if (cur === 0) {
+        acc.push(pq.pop() ?? 0);
+        return acc;
+      }
+      pq.push(cur);
+      return acc;
+    }, [])
+    .join("\n")
+);

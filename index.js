@@ -1,98 +1,159 @@
-const problem = `9
+const problem = `13
 0
-12345678
 1
 2
 0
 0
+3
+2
+1
 0
 0
-32`
+0
+0
+0`
+
+// class MaxHeap {
+//   constructor() {
+//     this.heap = [];
+//   }
+
+//   size(){
+//     return this.heap.length;
+//   }
+
+//   empty(){
+//     if(this.heap.length === 0) return true;
+//     return false;
+//   }
+
+//   swap(indexA, indexB){
+//     [this.heap[indexA], this.heap[indexB]] = [this.heap[indexB], this.heap[indexA]];
+//   }
+
+//   insert(value){
+//     this.heap.push(value);
+//     this.bubbleUp();
+//   }
+
+//   bubbleUp(){
+//     let current = this.heap.length - 1;
+
+//     while(current > 0){
+//       const parent = Math.floor((current - 1) / 2);
+//       if(this.heap[parent] >= this.heap[current]) return;
+
+//       this.swap(parent, current);
+//       current = parent;
+//     }
+//   }
+
+//   bubbleDown(index){
+//     let current = index;
+//     const leftChild = current * 2 + 1;
+//     const rightChild = current * 2 + 2;
+//     const length = this.heap.length;
+
+//     if(leftChild < length && this.heap[leftChild] > this.heap[current]) current = leftChild;
+
+//     if(rightChild < length && this.heap[rightChild] > this.heap[current] ) current = rightChild;
+
+//     if(current !== index){
+//       this.swap(current, index);
+//       this.bubbleDown(current)
+//     }
+
+//   }
+
+//   extractMax(){
+//     if(this.heap.length === 1) return this.heap.pop();
+
+//     const max = this.heap[0];
+//     this.heap[0] = this.heap.pop();
+//     this.bubbleDown(0);
+
+//     return max;
+//   }
+// }
 
 
-class MinHeap {
+
+
+class MaxHeap {
   constructor() {
-    this.heap = [];
+      this.heap = [];
   }
-
-  swap(indexA, indexB) {
-    [this.heap[indexA], this.heap[indexB]] = [this.heap[indexB], this.heap[indexA]];
-  }
-
+  
   size() {
-    return this.heap.length;
+      return this.heap.length;
   }
-
-  push(value) {
-    this.heap.push(value);
-    this.upHeap();
-    return this.heap.length;
+  
+  empty() {
+      if(this.heap.length === 0) return true;
+      return false;
   }
-
-  pop() {
-    if (this.heap.length === 0) {
-      return undefined;
-    }
-    this.swap(0, this.heap.length - 1);
-    const value = this.heap.pop();
-    this.downHeap(0);
-    return value;
+  
+  swap(indexA, indexB){
+      [this.heap[indexA], this.heap[indexB]] = [this.heap[indexB], this.heap[indexA]];
   }
-
-  upHeap() {
-    let current = this.heap.length - 1;
-
-    while (0 < current) {
-      const parent = Math.floor((current - 1) / 2);
-      if (this.heap[parent] <= this.heap[current]) {
-        return;
-      }
-      this.swap(parent, current);
-      current = parent;
-    }
+  
+  insert(value){
+      this.heap.push(value);
+      this.bubbleUp();
   }
-
-  downHeap(idx) {
-    let current = idx;
-
-    while (current < this.heap.length) {
-      // CBT 구조 특징 : 특정 idx의 자식 노드 -> idx*2+1, idx*2+2
-      let leftChild = current * 2 + 1;
-      let rightChild = current * 2 + 2;
-
-      if (this.heap[leftChild] === undefined) {
-        break;
+  
+  bubbleUp(){
+      let current = this.heap.length - 1;
+      
+      while(current > 0){
+          const parent = Math.floor((current - 1) / 2);
+          if(this.heap[parent] >= this.heap[current]) return;
+          
+          this.swap(parent, current);
+          current = parent;
       }
-      if (this.heap[rightChild] === undefined) {
-        if (this.heap[current] <= this.heap[leftChild]) {
-          break;
-        }
-        this.swap(current, leftChild);
-        current = leftChild;
-        continue;
+  }
+  
+  bubbleDown(index){
+      let current = index;
+      const leftChild = current * 2 + 1;
+      const rightChild = current * 2 + 2;
+      const length = this.heap.length;
+      
+      if(leftChild < length && this.heap[leftChild] > this.heap[current]) current = leftChild;
+      if(rightChild < length && this.heap[rightChild] > this.heap[current]) current = rightChild;
+      
+      if(current !== index){
+          this.swap(current, index);
+          this.bubbleDown(current);
       }
-      const nextChild = this.heap[leftChild] <= this.heap[rightChild] ? leftChild : rightChild;
-      if (this.heap[current] <= this.heap[nextChild]) {
-        break;
-      }
-      this.swap(current, nextChild);
-      current = nextChild;
-    }
+  }
+  
+  extractMax(){
+      if(this.heap.length === 1) return this.heap.pop();
+      
+      const max = this.heap[0];
+      this.heap[0] = this.heap.pop();
+      this.bubbleDown(0);
+      
+      return max;
   }
 }
 
-// const [N, ...arr] = require("fs").readFileSync("/dev/stdin").toString().trim().split("\n").map(Number);
-const [N, ...arr] = problem.toString().trim().split('\n').map(Number)
-const pq = new MinHeap();
-console.log(
-  arr
-    .reduce((acc, cur) => {
-      if (cur === 0) {
-        acc.push(pq.pop() ?? 0);
-        return acc;
-      }
-      pq.push(cur);
-      return acc;
-    }, [])
-    .join("\n")
-);
+const [n, ...arr] = problem.toString().trim().split('\n').map(v => +v)
+
+const answer = [];
+const maxHeap = new MaxHeap();
+arr.forEach(v => {
+  if (v == 0) {
+    if (maxHeap.empty()) {
+      answer.push(0);
+    } else {
+      answer.push(maxHeap.extractMax());
+    }
+  } else {
+    maxHeap.insert(v);
+  }
+})
+
+console.log(answer.join('\n'));
